@@ -1,4 +1,7 @@
-import glob from 'glob'
+import glob from "glob";
+import { promisify } from "util";
+import path from "path";
+import fs from "fs";
 
 export default () => ({
   "client/utils/display.js": {
@@ -10,8 +13,44 @@ export default () => ({
   }
 });
 
-const searchDirectory = (path) => {
-	return glob.sync(`./**/*.js`, {cwd: path})
-}
+export const listFiles = async path => {
+  const globAsync = promisify(glob);
 
-export { searchDirectory }
+  return globAsync(`./**/*.js`, { cwd: path });
+};
+
+export const findExports = async (cwd, file) => {
+  const filePath = path.resolve(cwd, file);
+  const readFileAsync = promisify(fs.readFile);
+
+  const content = await readFileAsync(filePath, { encoding: "utf8" });
+
+  return { exports: parseExports(content) };
+};
+
+export const parseExports = content => {
+  const regex = /^export\s(default)|^export\sconst\s(\w+)|^export\s{\s?([\w,\s]+)\s?}|^export\sfunction\s(\w+)|^export\sclass\s(\w+)|^export\s(\w+)\sfrom/gm;
+  let m;
+  let results = [];
+
+  while ((m = regex.exec(content)) !== null) {
+    // This is necessary to avoid infinite loops with zero-width matches
+    if (m.index === regex.lastIndex) {
+      regex.lastIndex++;
+    }
+
+    // The result can be accessed through the `m`-variable.
+    m.forEach((match, groupIndex) => {
+      if (groupIndex !== 0 && match !== undefined) {
+        results = results.concat(
+          match
+            .trim()
+            .split(",")
+            .map(m => m.trim())
+        );
+      }
+    });
+  }
+
+  return results;
+};
