@@ -7,12 +7,15 @@
   "author": "ThinkCERCA",
   "license": "MIT",
   "devDependencies": {
-    "babel-jest": "^23.6.0",
-    "babel-preset-env": "^1.7.0",
+    "@types/glob": "^7.1.1",
+    "@types/jest": "^23.3.2",
+    "@types/node": "^10.11.2",
     "husky": "^1.0.1",
     "jest": "^23.6.0",
     "prettier": "^1.14.3",
-    "pretty-quick": "^1.7.0"
+    "pretty-quick": "^1.7.0",
+    "ts-jest": "^23.10.2",
+    "typescript": "^3.1.1"
   },
   "scripts": {
     "test": "jest"
