@@ -3,7 +3,7 @@ import { promisify } from 'util'
 import path from 'path'
 import fs from 'fs'
 
-export default (_unused: string) => ({
+export default (_path: string) => ({
   'client/utils/display.js': {
     default: ['client/components/A.js', 'client/components/B.js'],
     Display: ['client/components/C.js'],
