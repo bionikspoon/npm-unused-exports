@@ -1,4 +1,9 @@
-import analyzeExports, { listFiles, findExports, parseExports } from '../'
+import analyzeExports, {
+  listFiles,
+  parseFile,
+  parseExports,
+  parseImports,
+} from '../'
 
 describe('unusedExports', () => {
   test('it finds export usage', () => {
@@ -30,13 +35,24 @@ describe('listFiles', () => {
   })
 })
 
-describe('findExport', () => {
-  test('it will find exports given a file', async () => {
-    const results = await findExports(
+describe('parseFile', () => {
+  test('it will find imports/exports given a file', async () => {
+    const results = await parseFile(
       './src/__mockDirectory__',
       './client/utils/display.js'
     )
-    expect(results).toEqual({ exports: ['default', 'Display'] })
+    expect(results).toEqual({ exports: ['default', 'Display'], imports: {} })
+  })
+
+  test('it will find imports/exports given a file', async () => {
+    const results = await parseFile(
+      './src/__mockDirectory__',
+      './client/components/A.js'
+    )
+    expect(results).toEqual({
+      exports: ['default'],
+      imports: { '../utils/display': ['default'] },
+    })
   })
 })
 
@@ -47,9 +63,9 @@ export default "display";
 export const Display1 = "";
 export { Display2 }
 export { Display3, Display4, Display5 }
-export { 
-	Display6, 
-	Display7, 
+export {
+	Display6,
+	Display7,
 	Display8
 }
 export function Display9() {}
@@ -73,5 +89,24 @@ export Display12 from 'display'
       'Display11',
       'Display12',
     ])
+  })
+})
+
+describe('parsingImports', () => {
+  test('it finds es6 imports', () => {
+    const sampleContents = `
+import Display from './mockFile'
+import { Display2 } from './mockFile2'
+import { Display3, Display4, Display5 } from './mockFile3'
+import Display6, { Display7, Display8 } from './mockFile4'
+import * as something from './mockFile5'
+`
+    expect(parseImports(sampleContents)).toEqual({
+      './mockFile': ['default'],
+      './mockFile2': ['Display2'],
+      './mockFile3': ['Display3', 'Display4', 'Display5'],
+      './mockFile4': ['default', 'Display7', 'Display8'],
+      './mockFile5': ['*'],
+    })
   })
 })

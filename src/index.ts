@@ -19,13 +19,13 @@ export const listFiles = async (path: string) => {
   return globAsync(`./**/*.js`, { cwd: path })
 }
 
-export const findExports = async (cwd: string, file: string) => {
+export const parseFile = async (cwd: string, file: string) => {
   const filePath = path.resolve(cwd, file)
   const readFileAsync = promisify(fs.readFile)
 
   const content = await readFileAsync(filePath, { encoding: 'utf8' })
 
-  return { exports: parseExports(content) }
+  return { exports: parseExports(content), imports: parseImports(content) }
 }
 
 export const parseExports = (content: string) => {
@@ -50,6 +50,28 @@ export const parseExports = (content: string) => {
         )
       }
     })
+  }
+
+  return results
+}
+
+export const parseImports = (content: string) => {
+  const regex = /^import ([\w\*\s]*)?,?\s?(?:{\s?([\w,\s]*?)\s?})? from ['"](.*)['"]/gm
+  let m
+  let results: { [key: string]: string[] } = {}
+
+  while ((m = regex.exec(content)) !== null) {
+    // This is necessary to avoid infinite loops with zero-width matches
+    if (m.index === regex.lastIndex) {
+      regex.lastIndex++
+    }
+
+    let item = [m[1] ? (m[1].startsWith('*') ? '*' : 'default') : '']
+
+    results[m[3]] = (m[2]
+      ? item.concat(m[2].split(',').map(m => m.trim()))
+      : item
+    ).filter(i => i.length)
   }
 
   return results
