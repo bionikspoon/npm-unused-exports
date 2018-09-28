@@ -3,15 +3,51 @@ import { promisify } from 'util'
 import path from 'path'
 import fs from 'fs'
 
-export default (_path: string) => ({
-  'client/utils/display.js': {
-    default: ['client/components/A.js', 'client/components/B.js'],
-    Display: ['client/components/C.js'],
-  },
-  'client/utils/camelcase.js': {
-    default: [],
-  },
-})
+const relativePath = (from: string, ...to: string[]) =>
+  path.relative(from, path.resolve(from, ...to))
+
+export default async (cwd: string) => {
+  const files = await listFiles(cwd)
+
+  const parsedFiles = await Promise.all(files.map(file => parseFile(cwd, file)))
+
+  const results: { [key: string]: any } = {}
+
+  parsedFiles.forEach(pf => {
+    const filepath = relativePath(cwd, pf.file)
+    results[filepath] = {}
+
+    pf.exports.forEach(_export => {
+      results[filepath][_export] = []
+    })
+  })
+
+  parsedFiles.forEach(pf => {
+    Object.keys(pf.imports).forEach(key => {
+      const imports = pf.imports[key]
+      const importFilename = `${relativePath(cwd, pf.file, '..', key)}.js`
+
+      const fileExports = results[importFilename]
+
+      imports.forEach(_import => {
+        if (!fileExports) {
+          return
+        }
+        if (!fileExports[_import]) {
+          return
+        }
+
+        fileExports[_import].push(relativePath(cwd, pf.file))
+      })
+
+      // results[filename][key] = results[filename][key].push(pf.file)
+    })
+  })
+
+  results
+
+  return results
+}
 
 export const listFiles = async (path: string) => {
   const globAsync = promisify(glob)
@@ -25,7 +61,11 @@ export const parseFile = async (cwd: string, file: string) => {
 
   const content = await readFileAsync(filePath, { encoding: 'utf8' })
 
-  return { exports: parseExports(content), imports: parseImports(content) }
+  return {
+    file,
+    exports: parseExports(content),
+    imports: parseImports(content),
+  }
 }
 
 export const parseExports = (content: string) => {

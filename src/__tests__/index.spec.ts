@@ -5,9 +5,9 @@ import analyzeExports, {
   parseImports,
 } from '../'
 
-describe('unusedExports', () => {
-  test('it finds export usage', () => {
-    const results = analyzeExports('../__mockDirectory__')
+describe('analyzeExports', () => {
+  test('it finds export usage', async () => {
+    const results = await analyzeExports('./src/__mockDirectory__')
 
     expect(results).toEqual({
       'client/utils/display.js': {
@@ -15,6 +15,15 @@ describe('unusedExports', () => {
         Display: ['client/components/C.js'],
       },
       'client/utils/camelcase.js': {
+        default: [],
+      },
+      'client/components/A.js': {
+        default: [],
+      },
+      'client/components/B.js': {
+        default: [],
+      },
+      'client/components/C.js': {
         default: [],
       },
     })
@@ -41,7 +50,11 @@ describe('parseFile', () => {
       './src/__mockDirectory__',
       './client/utils/display.js'
     )
-    expect(results).toEqual({ exports: ['default', 'Display'], imports: {} })
+    expect(results).toEqual({
+      file: './client/utils/display.js',
+      exports: ['default', 'Display'],
+      imports: {},
+    })
   })
 
   test('it will find imports/exports given a file', async () => {
@@ -50,6 +63,7 @@ describe('parseFile', () => {
       './client/components/A.js'
     )
     expect(results).toEqual({
+      file: './client/components/A.js',
       exports: ['default'],
       imports: { '../utils/display': ['default'] },
     })
