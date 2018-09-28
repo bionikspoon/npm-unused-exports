@@ -1,3 +1,3 @@
-import { Display } from "../utils/display";
+import { Display } from '../utils/display'
 
-export default Display;
+export default Display

@@ -1,42 +1,42 @@
-import glob from "glob";
-import { promisify } from "util";
-import path from "path";
-import fs from "fs";
+import glob from 'glob'
+import { promisify } from 'util'
+import path from 'path'
+import fs from 'fs'
 
 export default () => ({
-  "client/utils/display.js": {
-    default: ["client/components/A.js", "client/components/B.js"],
-    Display: ["client/components/C.js"]
+  'client/utils/display.js': {
+    default: ['client/components/A.js', 'client/components/B.js'],
+    Display: ['client/components/C.js'],
   },
-  "client/utils/camelcase.js": {
-    default: []
-  }
-});
+  'client/utils/camelcase.js': {
+    default: [],
+  },
+})
 
 export const listFiles = async path => {
-  const globAsync = promisify(glob);
+  const globAsync = promisify(glob)
 
-  return globAsync(`./**/*.js`, { cwd: path });
-};
+  return globAsync(`./**/*.js`, { cwd: path })
+}
 
 export const findExports = async (cwd, file) => {
-  const filePath = path.resolve(cwd, file);
-  const readFileAsync = promisify(fs.readFile);
+  const filePath = path.resolve(cwd, file)
+  const readFileAsync = promisify(fs.readFile)
 
-  const content = await readFileAsync(filePath, { encoding: "utf8" });
+  const content = await readFileAsync(filePath, { encoding: 'utf8' })
 
-  return { exports: parseExports(content) };
-};
+  return { exports: parseExports(content) }
+}
 
 export const parseExports = content => {
-  const regex = /^export\s(default)|^export\sconst\s(\w+)|^export\s{\s?([\w,\s]+)\s?}|^export\sfunction\s(\w+)|^export\sclass\s(\w+)|^export\s(\w+)\sfrom/gm;
-  let m;
-  let results = [];
+  const regex = /^export\s(default)|^export\sconst\s(\w+)|^export\s{\s?([\w,\s]+)\s?}|^export\sfunction\s(\w+)|^export\sclass\s(\w+)|^export\s(\w+)\sfrom/gm
+  let m
+  let results = []
 
   while ((m = regex.exec(content)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches
     if (m.index === regex.lastIndex) {
-      regex.lastIndex++;
+      regex.lastIndex++
     }
 
     // The result can be accessed through the `m`-variable.
@@ -45,12 +45,12 @@ export const parseExports = content => {
         results = results.concat(
           match
             .trim()
-            .split(",")
+            .split(',')
             .map(m => m.trim())
-        );
+        )
       }
-    });
+    })
   }
 
-  return results;
-};
+  return results
+}
