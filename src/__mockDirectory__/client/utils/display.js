@@ -1,2 +1,2 @@
-export default "display";
-export const Display = "Display";
+export default 'display'
+export const Display = 'Display'

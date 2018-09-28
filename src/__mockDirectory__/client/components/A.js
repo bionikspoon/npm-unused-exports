@@ -1,3 +1,3 @@
-import display from "../utils/display";
+import display from '../utils/display'
 
-export default display;
+export default display

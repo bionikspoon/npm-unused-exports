@@ -1,1 +1,1 @@
-export default "camelcase";
+export default 'camelcase'
