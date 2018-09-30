@@ -1,17 +1,18 @@
-import glob from 'glob'
-import { promisify } from 'util'
-import path from 'path'
+import { ResolverFactory } from 'enhanced-resolve'
 import fs from 'fs'
-import parseContent, { ParsedFile } from './parseContent'
+import glob from 'glob'
+import path from 'path'
 import { flatten } from 'ramda'
+import { promisify } from 'util'
+
+import parseContent, { IParsedFile } from './parseContent'
 import relativePath from './relativePath'
 import resolveImportFactory from './resolveImportFactory'
-import { ResolverFactory } from 'enhanced-resolve'
 
 const globAsync = promisify(glob)
 const readFileAsync = promisify(fs.readFile)
 
-interface Data {
+interface IData {
   [key: string]: { [key: string]: string[] }
 }
 
@@ -21,7 +22,7 @@ export default async (
 ) => {
   const parsedFiles = await parseDirectory(basepath)
 
-  const data: Data = {}
+  const data: IData = {}
 
   mapExports(parsedFiles, basepath, data)
   await mapImports(parsedFiles, basepath, data, resolverOptions)
@@ -29,7 +30,11 @@ export default async (
   return data
 }
 
-const mapExports = (parsedFiles: ParsedFile[], basepath: string, data: Data) =>
+const mapExports = (
+  parsedFiles: IParsedFile[],
+  basepath: string,
+  data: IData
+) =>
   parsedFiles.forEach(parsedFile => {
     const exportFile = relativePath(basepath, parsedFile.pathname)
     data[exportFile] = {}
@@ -40,9 +45,9 @@ const mapExports = (parsedFiles: ParsedFile[], basepath: string, data: Data) =>
   })
 
 const mapImports = async (
-  parsedFiles: ParsedFile[],
+  parsedFiles: IParsedFile[],
   basepath: string,
-  data: Data,
+  data: IData,
   resolverOptions: ResolverFactory.ResolverOption
 ) => {
   const resolveImport = resolveImportFactory(basepath, resolverOptions)

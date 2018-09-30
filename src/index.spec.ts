@@ -7,28 +7,18 @@ describe('analyzeExports', () => {
     })
 
     expect(results).toEqual({
-      'client/index.js': {},
-      'client/utils/display.js': {
-        default: ['client/components/A.js', 'client/components/B.js'],
-        Display: ['client/components/C.js'],
-      },
-      'client/utils/camelcase.js': {
-        default: [],
-      },
+      'client/components/A.js': { default: ['client/components/App/App.js'] },
       'client/components/App/App.js': {
         default: ['client/components/App/index.js'],
       },
-      'client/components/App/index.js': {
-        default: ['client/index.js'],
-      },
-      'client/components/A.js': {
-        default: ['client/components/App/App.js'],
-      },
-      'client/components/B.js': {
-        default: ['client/components/App/App.js'],
-      },
-      'client/components/C.js': {
-        default: ['client/components/App/App.js'],
+      'client/components/App/index.js': { default: ['client/index.js'] },
+      'client/components/B.js': { default: ['client/components/App/App.js'] },
+      'client/components/C.js': { default: ['client/components/App/App.js'] },
+      'client/index.js': {},
+      'client/utils/camelcase.js': { default: [] },
+      'client/utils/display.js': {
+        Display: ['client/components/C.js'],
+        default: ['client/components/A.js', 'client/components/B.js'],
       },
     })
   })
@@ -58,9 +48,9 @@ describe('parseFile', () => {
       './client/utils/display.js'
     )
     expect(results).toEqual({
-      pathname: './client/utils/display.js',
       exports: ['default', 'Display'],
       imports: [],
+      pathname: './client/utils/display.js',
     })
   })
 
@@ -70,9 +60,9 @@ describe('parseFile', () => {
       './client/components/A.js'
     )
     expect(results).toEqual({
-      pathname: './client/components/A.js',
       exports: ['default'],
       imports: [['default', '../utils/display']],
+      pathname: './client/components/A.js',
     })
   })
 })

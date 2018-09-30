@@ -1,17 +1,16 @@
-import traverse from '@babel/traverse'
 import { parse } from '@babel/parser'
+import traverse from '@babel/traverse'
 import * as t from '@babel/types'
 
-export interface ParsedFile {
+export interface IParsedFile {
   pathname: string
   exports: string[]
-  imports: [string, string][]
+  imports: Array<[string, string]>
 }
 
 export default (content: string, pathname: string) => {
-  const parsed: ParsedFile = { pathname, exports: [], imports: [] }
+  const parsed: IParsedFile = { pathname, exports: [], imports: [] }
   const tree = parse(content, {
-    sourceType: 'module',
     plugins: [
       'jsx',
       'exportDefaultFrom',
@@ -20,6 +19,7 @@ export default (content: string, pathname: string) => {
       'exportNamespaceFrom',
       'dynamicImport',
     ],
+    sourceType: 'module',
   })
 
   traverse(tree, {

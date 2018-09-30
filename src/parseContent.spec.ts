@@ -21,13 +21,6 @@ describe('parseContent', () => {
     `
 
     expect(parseContent(sampleContent, './index.js')).toEqual({
-      pathname: './index.js',
-      imports: [
-        ['default', './display16'],
-        ['Display17', './display17'],
-        ['Display18', './display17'],
-        ['Display19', './display17'],
-      ],
       exports: [
         'default',
         'Display1',
@@ -47,6 +40,13 @@ describe('parseContent', () => {
         'Display18',
         'Display20',
       ],
+      imports: [
+        ['default', './display16'],
+        ['Display17', './display17'],
+        ['Display18', './display17'],
+        ['Display19', './display17'],
+      ],
+      pathname: './index.js',
     })
   })
 
@@ -60,7 +60,6 @@ describe('parseContent', () => {
     `
 
     expect(parseContent(sampleContent, './index.js')).toEqual({
-      pathname: './index.js',
       exports: [],
       imports: [
         ['default', './display1'],
@@ -73,6 +72,7 @@ describe('parseContent', () => {
         ['Display8', './display4'],
         ['*', './display5'],
       ],
+      pathname: './index.js',
     })
   })
 })
