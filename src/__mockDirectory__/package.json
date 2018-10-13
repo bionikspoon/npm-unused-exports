@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "react": "*",
+    "react-dom": "*",
+    "@bionikspoon/package": "*"
+  }
+}
