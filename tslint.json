@@ -1,0 +1,10 @@
+{
+  "defaultSeverity": "warning",
+  "extends": ["tslint:latest", "tslint-config-prettier"],
+  "jsRules": {},
+  "rules": {
+    "curly": false,
+    "variable-name": [true, "check-format", "allow-leading-underscore"]
+  },
+  "rulesDirectory": []
+}

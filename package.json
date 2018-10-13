@@ -7,21 +7,33 @@
   "author": "ThinkCERCA",
   "license": "MIT",
   "devDependencies": {
+    "@types/babel__parser": "^7.0.0",
+    "@types/babel__traverse": "^7.0.0",
+    "@types/enhanced-resolve": "^3.0.6",
     "@types/glob": "^7.1.1",
     "@types/jest": "^23.3.2",
     "@types/node": "^10.11.2",
+    "@types/ramda": "^0.25.38",
     "husky": "^1.0.1",
     "jest": "^23.6.0",
     "prettier": "^1.14.3",
     "pretty-quick": "^1.7.0",
     "ts-jest": "^23.10.2",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
     "typescript": "^3.1.1"
   },
   "scripts": {
+    "lint": "tslint 'src/**/*.ts'",
     "test": "jest"
   },
   "dependencies": {
-    "glob": "^7.1.3"
+    "@babel/parser": "^7.1.2",
+    "@babel/traverse": "^7.1.0",
+    "@babel/types": "^7.1.2",
+    "enhanced-resolve": "^4.1.0",
+    "glob": "^7.1.3",
+    "ramda": "^0.25.0"
   },
   "husky": {
     "hooks": {
