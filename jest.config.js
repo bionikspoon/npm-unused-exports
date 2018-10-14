@@ -1,6 +1,8 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const CI = String(process.env.CI).toLowerCase() === 'true'
+
 module.exports = {
   preset: 'ts-jest/presets/js-with-ts',
   testEnvironment: 'node',
@@ -20,7 +22,7 @@ module.exports = {
   clearMocks: true,
 
   // Indicates whether the coverage information should be collected while executing the test
-  collectCoverage: (process.env.CI || '').toLowerCase() === 'true',
+  collectCoverage: CI,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   // collectCoverageFrom: null,
