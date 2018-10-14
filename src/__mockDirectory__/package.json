@@ -3,5 +3,8 @@
     "react": "*",
     "react-dom": "*",
     "@bionikspoon/package": "*"
+  },
+  "devDependencies": {
+    "ramda": "*"
   }
 }

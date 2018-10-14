@@ -35,6 +35,7 @@ describe('analyzeExports', () => {
         Display: ['client/components/C.js'],
         default: ['client/components/A.js', 'client/components/B.js'],
       },
+      ramda: {},
       react: {
         default: ['client/index.js', 'client/components/App/App.js'],
       },
