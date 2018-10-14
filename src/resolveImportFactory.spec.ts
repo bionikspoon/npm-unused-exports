@@ -26,3 +26,29 @@ describe('with options', () => {
     ).toEqual('client/utils/display.js')
   })
 })
+
+describe('with npm module', () => {
+  const resolveImport = resolveImportFactory('src/__mockDirectory__/', {
+    modules: ['client'],
+  })
+
+  test("it does't resolve npm modules", async () => {
+    expect(await resolveImport('client/components/C.js', 'react/src')).toEqual(
+      'react'
+    )
+  })
+})
+describe('with namespaced npm module', () => {
+  const resolveImport = resolveImportFactory('src/__mockDirectory__/', {
+    modules: ['client'],
+  })
+
+  test('it works with namespaced npm modules', async () => {
+    expect(
+      await resolveImport(
+        'client/components/C.js',
+        '@bionikspoon/package/folder'
+      )
+    ).toEqual('@bionikspoon/package')
+  })
+})

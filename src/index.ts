@@ -2,7 +2,7 @@ import { ResolverFactory } from 'enhanced-resolve'
 import fs from 'fs'
 import glob from 'glob'
 import path from 'path'
-import { flatten } from 'ramda'
+import { flatten, intersection } from 'ramda'
 import { promisify } from 'util'
 
 import parseContent, { IParsedFile } from './parseContent'
@@ -18,13 +18,15 @@ interface IData {
 
 export default async (
   basepath: string,
+  globString: string,
   resolverOptions: ResolverFactory.ResolverOption = {}
 ) => {
-  const parsedFiles = await parseDirectory(basepath)
+  const parsedFiles = await parseDirectory(basepath, globString)
 
   const data: IData = {}
 
   mapExports(parsedFiles, basepath, data)
+  await tryAddPackages(basepath, data)
   await mapImports(parsedFiles, basepath, data, resolverOptions)
 
   return data
@@ -44,6 +46,33 @@ const mapExports = (
     )
   })
 
+const tryAddPackages = async (basepath: string, data: IData) => {
+  try {
+    await addPackages(basepath, data)
+  } catch (error) {
+    /* tslint:disable-next-line:no-console */
+    console.info('package.json not found')
+  }
+}
+
+const addPackages = async (basepath: string, data: IData) => {
+  const packageJson = await readFileAsync(
+    path.resolve(basepath, 'package.json')
+  )
+
+  const { dependencies, devDependencies } = JSON.parse(packageJson.toString())
+
+  const addDependency = (name: string) => {
+    data[name] = {}
+  }
+
+  if (dependencies) {
+    Object.keys(dependencies).map(addDependency)
+  }
+  if (devDependencies) {
+    Object.keys(devDependencies).map(addDependency)
+  }
+}
 const mapImports = async (
   parsedFiles: IParsedFile[],
   basepath: string,
@@ -58,8 +87,20 @@ const mapImports = async (
     return parsedFile.imports.map(async ([importName, _importFile]) => {
       const importFile = await resolveImport(exportFile, _importFile)
 
-      if (!data[importFile]) return
-      if (!data[importFile][importName]) return
+      if (!data[importFile]) {
+        /* tslint:disable-next-line:no-console */
+        console.info('not found', importFile)
+        return
+      }
+
+      if (importName === '*') {
+        Object.values(data[importFile]).map(value => value.push(exportFile))
+        return
+      }
+
+      if (!(data[importFile][importName] instanceof Array)) {
+        data[importFile][importName] = []
+      }
 
       data[importFile][importName].push(exportFile)
     })
@@ -68,19 +109,33 @@ const mapImports = async (
   await Promise.all(flatten(iterator))
 }
 
-export const findFiles = async (cwd: string) =>
-  globAsync(`./!(node_modules)/**/*.js`, { cwd })
+export const findFiles = async (cwd: string, globString: string) => {
+  const allFiles = await globAsync(`./!(node_modules)/**/*.*`, { cwd })
+  const targetFiles = await globAsync(globString, { cwd })
+  return intersection(allFiles, targetFiles)
+}
 
-export const parseFile = async (basepath: string, pathname: string) => {
-  const filePath = path.resolve(basepath, pathname)
+export const parseFile = async (
+  basepath: string,
+  pathname: string
+): Promise<IParsedFile> => {
+  const filepath = path.resolve(basepath, pathname)
 
-  const content = await readFileAsync(filePath, { encoding: 'utf8' })
+  if (path.extname(filepath) !== '.js') {
+    return {
+      exports: ['default'],
+      imports: [],
+      pathname,
+    }
+  }
+
+  const content = await readFileAsync(filepath, { encoding: 'utf8' })
 
   return parseContent(content, pathname)
 }
 
-const parseDirectory = async (basepath: string) => {
-  const files = await findFiles(basepath)
+const parseDirectory = async (basepath: string, globString: string) => {
+  const files = await findFiles(basepath, globString)
 
   return Promise.all(files.map(file => parseFile(basepath, file)))
 }
